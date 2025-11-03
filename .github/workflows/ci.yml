@@ -1,0 +1,63 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
+        # Install lightweight deps for CI; skip heavy ML packages
+        pip install pytest fastapi httpx sqlalchemy psycopg2-binary
+    - name: Run tests
+      run: |
+        cd backend
+        pytest
+    - name: Lint
+      run: |
+        cd backend
+        flake8 .
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+    - name: Run tests
+      run: |
+        cd frontend
+        npm test
+    - name: Lint
+      run: |
+        cd frontend
+        npm run lint
+
+  build-and-push:
+    needs: [backend-tests, frontend-tests]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build images
+      run: docker-compose build
+    # Add deploy steps here when ready for production

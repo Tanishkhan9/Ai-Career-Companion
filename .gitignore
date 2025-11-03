@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+.env
+
+# Virtualenv
+venv/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+.next/
+dist/
+/.parcel-cache
+package-lock.json
+# Ignore nested frontend git folder if present
+/frontend/.git
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+
+# Pytest cache
+.pytest_cache/
+
+# Postgres data
+postgres_data/
+redis_data/
