@@ -1,3 +1,164 @@
+# AI Career Companion
+
+Status: Working Prototype
+
+This repository contains a full-stack application: a FastAPI backend and a Next.js (App Directory) frontend. The project includes auth (register/login), a resume upload area, and a small test suite. This README provides quick start instructions for local development on Windows (PowerShell), testing notes, and troubleshooting tips.
+
+## Project layout
+
+- `backend/` — FastAPI app, SQLAlchemy models, Alembic migrations, and pytest tests.
+- `frontend/` — Next.js (AppDir) React frontend with Tailwind styles and Redux store.
+
+## Prerequisites
+
+- Windows (PowerShell) — commands below are PowerShell-friendly.
+- Node.js (v16+ recommended) and npm.
+- Python 3.10+ (venv recommended).
+
+NOTE: The full `requirements.txt` may include heavy ML packages (spaCy, sentence-transformers, numpy build requirements). For local development, prefer `backend/requirements.dev.txt` which contains lightweight dev dependencies used during development and testing.
+
+## Backend — quick start (PowerShell)
+
+1. Open a PowerShell terminal and change to the backend folder:
+
+```powershell
+Set-Location "C:\Users\hp\OneDrive\Desktop\Ai Career Companion\backend"
+```
+
+2. Activate the project's virtual environment (created previously in this workspace):
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+3. Ensure the `PYTHONPATH` points to the backend root so imports like `app` resolve:
+
+```powershell
+$env:PYTHONPATH = 'C:\Users\hp\OneDrive\Desktop\Ai Career Companion\backend'
+```
+
+4. Run the dev server (uvicorn):
+
+```powershell
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+5. Health and docs:
+
+- Health: http://127.0.0.1:8000/health
+- Swagger/OpenAPI: http://127.0.0.1:8000/docs
+
+## Frontend — quick start (PowerShell)
+
+1. In a separate PowerShell terminal:
+
+```powershell
+Set-Location "C:\Users\hp\OneDrive\Desktop\Ai Career Companion\frontend"
+```
+
+2. Install dependencies (one-time):
+
+```powershell
+npm ci
+# or npm install
+```
+
+3. Provide the API URL env var for local dev. Create `frontend/.env.local` (or set env var in your shell):
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+4. Start Next dev server:
+
+```powershell
+npm run dev
+```
+
+5. Open the register page to test UI: http://localhost:3000/auth/register
+
+## Run backend tests
+
+From `backend/` with the venv active:
+
+```powershell
+# Make sure dev requirements are installed first
+pip install -r requirements.dev.txt
+# Run tests
+pytest -q
+```
+
+Tests in this project previously passed locally in this session (2 tests). If you see failures related to DB tables, ensure `backend/app/core/database.py` creates tables on import (this repo includes a call to `Base.metadata.create_all(bind=engine)` to help test runs).
+
+## Quick smoke test (PowerShell)
+
+Registers a test user and logs in directly against the backend to verify the auth flow.
+
+```powershell
+# Register
+$reg = @{ email = 'e2e_test+1@example.com'; password = 'Password123!'; full_name = 'E2E Test' } | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1/users/register' -Method Post -ContentType 'application/json' -Body $reg
+
+# Login
+$login = @{ email = 'e2e_test+1@example.com'; password = 'Password123!' } | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1/users/login' -Method Post -ContentType 'application/json' -Body $login
+```
+
+The login response should include an `access_token` and `token_type`.
+
+## Environment variables
+
+The backend uses Pydantic settings. The following env vars should be set for normal runs (use `.env` or set them in your shell):
+
+- `SECRET_KEY` — JWT secret
+- `DATABASE_URL` — e.g. `sqlite:///./dev.db` or your Postgres URL
+- `REDIS_URL` — if using Redis features (optional)
+- `OPENAI_API_KEY` — optional integrations
+- `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` — optional integrations
+- `REQUIRE_EMAIL_VERIFICATION` — `true` to require verifying new accounts (default: false)
+
+Example `.env` (backend):
+
+```
+SECRET_KEY=change-me
+DATABASE_URL=sqlite:///./dev.db
+REDIS_URL=redis://localhost:6379/0
+OPENAI_API_KEY=your-openai-key
+LINKEDIN_CLIENT_ID=your-linkedin-client-id
+LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret
+REQUIRE_EMAIL_VERIFICATION=false
+```
+
+Frontend expects:
+
+- `NEXT_PUBLIC_API_URL` — e.g. `http://localhost:8000/api/v1`
+
+Example `.env.local` (frontend):
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
+
+For tests you can use local SQLite or a temporary DB. The project includes code to create tables at startup to simplify local testing.
+
+## Notes & troubleshooting
+
+- If `uvicorn` raises ModuleNotFoundError: No module named 'app', ensure `PYTHONPATH` is set to the backend root as shown above.
+- Avoid installing the full `requirements.txt` locally unless you have the native build toolchain for packages like spaCy and numpy. Use `backend/requirements.dev.txt` for lightweight dev/test dependencies.
+- Password hashing: the project uses a hashing scheme compatible with development environments (pbkdf2/bcrypt fallbacks) to avoid native bcrypt build issues during testing.
+
+## Next steps / recommended improvements
+
+- Add a local Docker Compose dev environment for reproducible setup (Postgres, Redis, backend, frontend).
+- Add Playwright or Cypress E2E tests to simulate the UI flows.
+- Harden tests with pytest fixtures that create and tear down ephemeral DBs per test.
+
+## Contact
+
+If you need changes to the README (add more detail, CI steps, or Docker instructions), tell me which sections to expand and I will update it.
+
+---
+Created/updated: November 4, 2025
 # 🤖 AI Career Companion
 
 ## 🚀 Overview
