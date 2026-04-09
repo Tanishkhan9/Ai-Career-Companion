@@ -23,8 +23,8 @@ export default function RegisterPage() {
     try {
       await register(email, password, fullName);
       router.push('/auth/confirm');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setLoading(false);
     }
