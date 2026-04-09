@@ -10,26 +10,33 @@ function ConfirmContent() {
   const token = searchParams.get("token") || undefined;
 
   useEffect(() => {
-    if (!token) {
-      setStatus("missing-token");
-      return;
-    }
+    let isMounted = true;
 
     const verify = async () => {
+      if (!token) {
+        if (isMounted) setStatus("missing-token");
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/users/verify?token=${encodeURIComponent(token)}`);
+        if (!isMounted) return;
         if (res.ok) {
           setStatus("success");
         } else {
           const data = await res.json();
-          setStatus(data?.detail || "failed");
+          if (isMounted) setStatus(data?.detail || "failed");
         }
-      } catch (err) {
-        setStatus("error");
+      } catch {
+        if (isMounted) setStatus("error");
       }
     };
 
     verify();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   return (
