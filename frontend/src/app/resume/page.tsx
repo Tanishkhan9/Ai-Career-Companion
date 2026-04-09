@@ -21,8 +21,8 @@ export default function ResumeUpload() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Upload failed')
       setMessage('Upload successful: ' + (data.filename || ''))
-    } catch (err: any) {
-      setMessage(err.message)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Upload failed')
     }
   }
 
