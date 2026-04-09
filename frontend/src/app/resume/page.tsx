@@ -1,10 +1,6 @@
-"use client"
 import React, { useState } from 'react'
-import { useAuthRedirect } from '@/lib/auth'
-import { uploadResume } from '@/lib/api'
 
 export default function ResumeUpload() {
-  useAuthRedirect()
   const [file, setFile] = useState<File | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -15,8 +11,15 @@ export default function ResumeUpload() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!file) return setMessage('Please select a file')
+    const form = new FormData()
+    form.append('file', file)
     try {
-      const data = await uploadResume(file)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/resume/upload`, {
+        method: 'POST',
+        body: form,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.detail || 'Upload failed')
       setMessage('Upload successful: ' + (data.filename || ''))
     } catch (err: any) {
       setMessage(err.message)

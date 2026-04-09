@@ -1,16 +1,26 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.api import api_router
 from app.core.config import get_settings
+from app.api.api import api_router
+from app.core.database import engine
+from app.models.base import Base
 
 settings = get_settings()
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
+    title="AI Career Companion API",
     description="Backend API for AI Career Companion platform",
     version=settings.VERSION,
 )
+
+# mount versioned API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# create database tables on startup (useful for SQLite/tests)
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 # Configure CORS
 app.add_middleware(
@@ -20,14 +30,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Include main API router under the configured API prefix
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-# Also expose the same routes at root for convenience during development and to
-# avoid 404s if the frontend base URL is misconfigured.
-app.include_router(api_router)
-
 
 @app.get("/health")
 async def health_check():
