@@ -10,12 +10,12 @@ function ConfirmContent() {
   const token = searchParams.get("token") || undefined;
 
   useEffect(() => {
-    if (!token) {
-      setStatus("missing-token");
-      return;
-    }
-
     const verify = async () => {
+      if (!token) {
+        setStatus("missing-token");
+        return;
+      }
+
       try {
         const res = await fetch(`${API_BASE}/users/verify?token=${encodeURIComponent(token)}`);
         if (res.ok) {
@@ -24,7 +24,7 @@ function ConfirmContent() {
           const data = await res.json();
           setStatus(data?.detail || "failed");
         }
-      } catch (err) {
+      } catch {
         setStatus("error");
       }
     };
