@@ -25,7 +25,7 @@ function ConfirmContent() {
           setStatus("success");
         } else {
           const data = await res.json();
-          setStatus(data?.detail || "failed");
+          if (isMounted) setStatus(data?.detail || "failed");
         }
       } catch {
         if (isMounted) setStatus("error");
