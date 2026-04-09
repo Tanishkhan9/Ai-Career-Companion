@@ -21,7 +21,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade pip setuptools wheel
         # Install lightweight deps for CI; skip heavy ML packages
-        pip install pytest fastapi httpx sqlalchemy psycopg2-binary
+        pip install pytest fastapi httpx sqlalchemy psycopg2-binary pydantic-settings
     - name: Run tests
       run: |
         cd backend
