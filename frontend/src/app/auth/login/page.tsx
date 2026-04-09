@@ -23,10 +23,10 @@ export default function LoginPage() {
       const data = await login(email, password);
       localStorage.setItem('token', data.access_token);
       router.push('/resume');
-    } catch (err: any) {
-      const msg: string = (err?.message || '').toLowerCase().includes('forbidden')
+    } catch (err: unknown) {
+      const msg: string = (err instanceof Error && err.message.toLowerCase().includes('forbidden'))
         ? 'Please verify your email before logging in.'
-        : err.message || 'Login failed';
+        : (err instanceof Error ? err.message : 'Login failed');
       setError(msg);
     } finally {
       setLoading(false);

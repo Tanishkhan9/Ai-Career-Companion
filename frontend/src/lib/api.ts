@@ -14,7 +14,7 @@ export async function uploadResume(file: File) {
     try {
       const data = await res.json()
       message = data.detail || message
-    } catch (_) {}
+    } catch {}
     throw new Error(message)
   }
   return res.json()
